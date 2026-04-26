@@ -37,7 +37,7 @@ func save_game(slot: int = 1) -> bool:
 		push_error("[SaveManager] Could not save to: %s" % file_path)
 		return false
 	
-	file.store_string(JSON.stringify(save_data, "\t"))
+	file.store_string(JSON.stringify(save_data))
 	print("[SaveManager] Game saved to slot %d" % slot)
 	return true
 

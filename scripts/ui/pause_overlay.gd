@@ -82,11 +82,15 @@ func _build_ui() -> void:
 	_main_menu_btn.pressed.connect(_on_main_menu)
 	vbox.add_child(_main_menu_btn)
 
+	var _save_btn = _make_button("Save Game")
+	_save_btn.pressed.connect(func(): SaveManager.save_game(1); _resume_btn.text = "Game Saved!"; await get_tree().create_timer(1.0).timeout; _resume_btn.text = "Resume")
+	vbox.add_child(_save_btn)
+
 	_exit_btn = _make_button("Exit Game")
 	_exit_btn.pressed.connect(_on_exit)
 	vbox.add_child(_exit_btn)
 
-	for button in [_resume_btn, _main_menu_btn, _exit_btn]:
+	for button in [_resume_btn, _main_menu_btn, _exit_btn, _panel.get_node("MarginContainer/VBoxContainer").get_child(4)]:
 		button.mouse_entered.connect(func() -> void:
 			button.self_modulate = Color(0.88, 0.94, 1.0, 1.0)
 		)
