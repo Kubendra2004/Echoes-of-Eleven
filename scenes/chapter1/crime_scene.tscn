@@ -151,6 +151,25 @@ volumetric_fog_enabled = true
 volumetric_fog_density = 0.02
 volumetric_fog_albedo = Color(0.6, 0.7, 0.85, 1)
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_back"]
+size = Vector3(12, 3.5, 0.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_side"]
+size = Vector3(0.2, 3.5, 10)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_counter"]
+size = Vector3(3, 1, 0.8)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_couch"]
+size = Vector3(2.5, 0.7, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_table"]
+size = Vector3(1.2, 0.05, 0.8)
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_table_leg"]
+height = 0.4
+radius = 0.03
+
 [node name="CrimeScene" type="Node3D"]
 script = ExtResource("1_ch1")
 
@@ -250,56 +269,116 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.65, -5)
 mesh = SubResource("BoxMesh_wall_back")
 surface_material_override/0 = SubResource("Mat_wall")
 
+[node name="StaticBody3D" type="StaticBody3D" parent="Room/BackWall"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Room/BackWall/StaticBody3D"]
+shape = SubResource("BoxShape3D_wall_back")
+
 [node name="LeftWall" type="MeshInstance3D" parent="Room"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 1.65, 0)
 mesh = SubResource("BoxMesh_wall_side")
 surface_material_override/0 = SubResource("Mat_wall")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Room/LeftWall"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Room/LeftWall/StaticBody3D"]
+shape = SubResource("BoxShape3D_wall_side")
 
 [node name="RightWall" type="MeshInstance3D" parent="Room"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1.65, 0)
 mesh = SubResource("BoxMesh_wall_side")
 surface_material_override/0 = SubResource("Mat_wall")
 
+[node name="StaticBody3D" type="StaticBody3D" parent="Room/RightWall"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Room/RightWall/StaticBody3D"]
+shape = SubResource("BoxShape3D_wall_side")
+
 [node name="FrontWall" type="MeshInstance3D" parent="Room"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.65, 5)
 mesh = SubResource("BoxMesh_wall_back")
 surface_material_override/0 = SubResource("Mat_wall")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Room/FrontWall"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Room/FrontWall/StaticBody3D"]
+shape = SubResource("BoxShape3D_wall_back")
 
 [node name="Ceiling" type="MeshInstance3D" parent="Room"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.5, 0)
 mesh = SubResource("BoxMesh_floor")
 surface_material_override/0 = SubResource("Mat_wall")
 
+[node name="StaticBody3D" type="StaticBody3D" parent="Room/Ceiling"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Room/Ceiling/StaticBody3D"]
+shape = SubResource("BoxShape3D_floor")
+
 [node name="KitchenCounter" type="MeshInstance3D" parent="Room"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0.5, -4)
 mesh = SubResource("BoxMesh_counter")
 surface_material_override/0 = SubResource("Mat_counter")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Room/KitchenCounter"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Room/KitchenCounter/StaticBody3D"]
+shape = SubResource("BoxShape3D_counter")
 
 [node name="Couch" type="MeshInstance3D" parent="Room"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0.35, -1)
 mesh = SubResource("BoxMesh_couch")
 surface_material_override/0 = SubResource("Mat_couch")
 
+[node name="StaticBody3D" type="StaticBody3D" parent="Room/Couch"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Room/Couch/StaticBody3D"]
+shape = SubResource("BoxShape3D_couch")
+
 [node name="Table" type="MeshInstance3D" parent="Room"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0.4, 0)
 mesh = SubResource("BoxMesh_table")
 surface_material_override/0 = SubResource("Mat_table")
 
+[node name="StaticBody3D" type="StaticBody3D" parent="Room/Table"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Room/Table/StaticBody3D"]
+shape = SubResource("BoxShape3D_table")
+
 [node name="TableLeg1" type="MeshInstance3D" parent="Room"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0.2, -0.3)
 mesh = SubResource("CylinderMesh_table_leg")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Room/TableLeg1"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Room/TableLeg1/StaticBody3D"]
+shape = SubResource("CylinderShape3D_table_leg")
 
 [node name="TableLeg2" type="MeshInstance3D" parent="Room"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0.2, -0.3)
 mesh = SubResource("CylinderMesh_table_leg")
 
+[node name="StaticBody3D" type="StaticBody3D" parent="Room/TableLeg2"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Room/TableLeg2/StaticBody3D"]
+shape = SubResource("CylinderShape3D_table_leg")
+
 [node name="TableLeg3" type="MeshInstance3D" parent="Room"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0.2, 0.3)
 mesh = SubResource("CylinderMesh_table_leg")
 
+[node name="StaticBody3D" type="StaticBody3D" parent="Room/TableLeg3"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Room/TableLeg3/StaticBody3D"]
+shape = SubResource("CylinderShape3D_table_leg")
+
 [node name="TableLeg4" type="MeshInstance3D" parent="Room"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0.2, 0.3)
 mesh = SubResource("CylinderMesh_table_leg")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Room/TableLeg4"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Room/TableLeg4/StaticBody3D"]
+shape = SubResource("CylinderShape3D_table_leg")
 
 [node name="Clues" type="Node3D" parent="."]
 
