@@ -1,0 +1,37 @@
+# GitHub Actions workflow for automated builds
+name: Build Detective Chronicles
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Download Godot 4.3
+        run: |
+          wget https://downloads.tuxfamily.org/godotengine/4.3/Godot_v4.3-stable_linux.x86_64.zip
+          unzip -q Godot_v4.3-stable_linux.x86_64.zip
+          chmod +x Godot_v4.3-stable_linux.x86_64/Godot_v4.3-stable_linux.x86_64
+          
+      - name: Export Linux x86_64
+        run: |
+          mkdir -p dist/linux
+          ./Godot_v4.3-stable_linux.x86_64/Godot_v4.3-stable_linux.x86_64 --headless --export-release "Linux/X64" dist/linux/detective_chronicles ./project.godot
+          chmod +x dist/linux/detective_chronicles
+          
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            dist/linux/detective_chronicles
+          draft: false
+          prerelease: ${{ contains(github.ref, 'beta') || contains(github.ref, 'alpha') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

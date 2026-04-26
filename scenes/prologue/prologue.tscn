@@ -1,0 +1,43 @@
+[gd_scene load_steps=2 format=3 uid="uid://prologue_intro"]
+
+[ext_resource type="Script" path="res://scripts/systems/prologue_controller.gd" id="1_prologue"]
+
+[node name="Prologue" type="Node3D"]
+script = ExtResource("1_prologue")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.707, -0.408, 0.577, 0, 0.816, 0.577, -0.707, -0.408, 0.577, 0, 10, 0)
+light_energy_db = 2.0
+
+[node name="UILayer" type="CanvasLayer" parent="."]
+
+[node name="Background" type="ColorRect" parent="UILayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.05, 0.04, 0.03, 1)
+
+[node name="Content" type="VBoxContainer" parent="UILayer"]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -400
+offset_top = -300
+offset_right = 400
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="SpeakerLabel" type="Label" parent="UILayer/Content"]
+custom_minimum_size = Vector2(800, 30)
+text = "CAPTAIN SHARMA"
+
+[node name="DialogueLabel" type="Label" parent="UILayer/Content"]
+custom_minimum_size = Vector2(800, 0)
+text = "We have a situation. Eleven bodies found hanging at a residence in Burari, New Delhi. The forensics team is baffled. Media is going crazy."
+autowrap_mode = 2

@@ -1,0 +1,39 @@
+# Dockerfile.lowend - Lightweight image for low-end systems
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Minimal dependencies
+RUN apt-get update && apt-get install -y \
+    libxkbcommon0 \
+    libxrandr6 \
+    libxi6 \
+    libxinerama1 \
+    libxcursor1 \
+    libxext6 \
+    libx11-6 \
+    libgl1 \
+    libpulse0 \
+    libssl3 \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/* /tmp/*
+
+# Create app directory
+WORKDIR /app
+
+# Copy only runtime files (not dev tools)
+COPY dist/linux/echoes_of_eleven /app/
+COPY dialogue_data/ /app/dialogue_data/
+COPY scenes/ /app/scenes/
+
+# Mark as executable
+RUN chmod +x /app/echoes_of_eleven
+
+# Optimization environment variables
+ENV LC_ALL=C
+ENV GODOT_PHYSICS_3D_SOLVER_ITERATIONS=2
+ENV GODOT_RENDER_QUALITY_DOF_BLUR=false
+ENV GODOT_RENDER_SCALING_3D_SCALE=0.75
+
+# Run game with optimizations
+CMD ["/app/echoes_of_eleven", "--resolution=960x540"]

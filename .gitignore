@@ -1,0 +1,62 @@
+# Godot
+.godot/
+*.tres
+*.tscn~
+*.gd~
+
+# Builds
+dist/
+build/
+bin/
+*.exe
+*.iso
+*.dmg
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+
+# Save files
+user://
+saves/
+*.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Node (if any web tools)
+node_modules/
+npm-debug.log*
+
+# Temporary
+*.tmp
+*.backup
+.temp/
+temp/
+
+# Logs
+*.log
+debug.log
+
+# Editor
+.Godot/
+.godot/
+*.md
+!README.md

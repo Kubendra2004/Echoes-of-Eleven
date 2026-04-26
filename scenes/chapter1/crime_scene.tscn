@@ -1,0 +1,400 @@
+[gd_scene load_steps=37 format=3 uid="uid://crime_scene"]
+
+[ext_resource type="Script" path="res://scripts/systems/chapter1_controller.gd" id="1_ch1"]
+[ext_resource type="PackedScene" uid="uid://hud" path="res://scenes/hud/hud.tscn" id="2_hud"]
+[ext_resource type="PackedScene" uid="uid://dialogue_ui" path="res://scenes/dialogue/dialogue_ui.tscn" id="3_dui"]
+[ext_resource type="PackedScene" uid="uid://qte_system" path="res://scenes/action/qte_system.tscn" id="4_qte"]
+[ext_resource type="PackedScene" uid="uid://deduction_board" path="res://scenes/investigation/deduction_board.tscn" id="5_db"]
+[ext_resource type="Script" path="res://scripts/entities/interactable_clue.gd" id="6_clue"]
+[ext_resource type="Script" path="res://scripts/systems/detective_camera.gd" id="7_cam"]
+[ext_resource type="Script" path="res://scripts/systems/fps_interaction.gd" id="8_fps"]
+[ext_resource type="Script" path="res://scripts/ui/pause_overlay.gd" id="9_pause"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_floor"]
+size = Vector3(12, 0.2, 10)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
+size = Vector3(12, 0.2, 10)
+
+[sub_resource type="StandardMaterial3D" id="Mat_floor"]
+albedo_color = Color(0.28, 0.3, 0.33, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall_back"]
+size = Vector3(12, 3.5, 0.2)
+
+[sub_resource type="StandardMaterial3D" id="Mat_wall"]
+albedo_color = Color(0.74, 0.78, 0.84, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall_side"]
+size = Vector3(0.2, 3.5, 10)
+
+[sub_resource type="BoxMesh" id="BoxMesh_counter"]
+size = Vector3(3, 1, 0.8)
+
+[sub_resource type="StandardMaterial3D" id="Mat_counter"]
+albedo_color = Color(0.66, 0.72, 0.8, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_couch"]
+size = Vector3(2.5, 0.7, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_couch"]
+albedo_color = Color(0.48, 0.58, 0.72, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_table"]
+size = Vector3(1.2, 0.05, 0.8)
+
+[sub_resource type="StandardMaterial3D" id="Mat_table"]
+albedo_color = Color(0.74, 0.66, 0.56, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_knife"]
+size = Vector3(0.4, 0.05, 0.08)
+
+[sub_resource type="StandardMaterial3D" id="Mat_knife"]
+albedo_color = Color(0.7, 0.1, 0.1, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_clue"]
+size = Vector3(0.5, 0.3, 0.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_latch"]
+size = Vector3(0.15, 0.15, 0.05)
+
+[sub_resource type="StandardMaterial3D" id="Mat_latch"]
+albedo_color = Color(0.5, 0.5, 0.4, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_footprint"]
+size = Vector3(0.3, 0.01, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="Mat_footprint"]
+albedo_color = Color(0.3, 0.2, 0.1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_phone"]
+size = Vector3(0.08, 0.01, 0.16)
+
+[sub_resource type="StandardMaterial3D" id="Mat_phone"]
+albedo_color = Color(0.1, 0.1, 0.12, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_photo"]
+size = Vector3(0.18, 0.01, 0.12)
+
+[sub_resource type="StandardMaterial3D" id="Mat_photo"]
+albedo_color = Color(0.9, 0.85, 0.8, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_report"]
+size = Vector3(0.22, 0.01, 0.3)
+
+[sub_resource type="StandardMaterial3D" id="Mat_report"]
+albedo_color = Color(0.95, 0.95, 0.9, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_table_leg"]
+size = Vector3(0.06, 0.4, 0.06)
+
+[sub_resource type="Environment" id="Environment_1"]
+ambient_light_source = 1
+ambient_light_color = Color(0.76, 0.82, 0.92, 1)
+ambient_light_energy = 1.15
+fog_enabled = true
+fog_light_color = Color(0.62, 0.7, 0.85, 1)
+fog_density = 0.004
+
+[node name="CrimeScene" type="Node3D"]
+script = ExtResource("1_ch1")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_1")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 4)
+fov = 70.0
+script = ExtResource("7_cam")
+
+[node name="InteractionRay" type="RayCast3D" parent="Camera3D"]
+target_position = Vector3(0, 0, -10)
+collision_mask = 1
+script = ExtResource("8_fps")
+
+[node name="CrosshairUI" type="CanvasLayer" parent="Camera3D"]
+layer = 3
+
+[node name="Crosshair" type="Label" parent="Camera3D/CrosshairUI"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -10.0
+offset_top = -12.0
+offset_right = 10.0
+offset_bottom = 12.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "+"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="InteractHint" type="Label" parent="Camera3D/CrosshairUI"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = 20.0
+offset_right = 260.0
+offset_bottom = 56.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "[E / Enter / Left Click] Interact"
+horizontal_alignment = 1
+modulate = Color(0.1, 0.18, 0.28, 1)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.866, 0, -0.866, 0.5, 0, 8, 2)
+light_color = Color(0.95, 0.94, 0.9, 1)
+light_energy = 1.35
+shadow_enabled = true
+
+[node name="LampLight" type="SpotLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -1, 0, 0, 0, -1, -1, 3.5, -1)
+light_color = Color(1, 0.85, 0.6, 1)
+light_energy = 7.0
+spot_range = 8.0
+spot_angle = 40.0
+shadow_enabled = true
+
+[node name="WindowLight" type="SpotLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.1, 1, 0, -1, 0.1, 2, 2.5, -4.5)
+light_color = Color(0.55, 0.67, 0.86, 1)
+light_energy = 3.8
+spot_range = 6.0
+spot_angle = 50.0
+
+[node name="Room" type="Node3D" parent="."]
+
+[node name="Floor" type="MeshInstance3D" parent="Room"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+mesh = SubResource("BoxMesh_floor")
+surface_material_override/0 = SubResource("Mat_floor")
+
+[node name="FloorBody" type="StaticBody3D" parent="Room/Floor"]
+
+[node name="FloorCollision" type="CollisionShape3D" parent="Room/Floor/FloorBody"]
+shape = SubResource("BoxShape3D_floor")
+
+[node name="BackWall" type="MeshInstance3D" parent="Room"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.65, -5)
+mesh = SubResource("BoxMesh_wall_back")
+surface_material_override/0 = SubResource("Mat_wall")
+
+[node name="LeftWall" type="MeshInstance3D" parent="Room"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 1.65, 0)
+mesh = SubResource("BoxMesh_wall_side")
+surface_material_override/0 = SubResource("Mat_wall")
+
+[node name="RightWall" type="MeshInstance3D" parent="Room"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1.65, 0)
+mesh = SubResource("BoxMesh_wall_side")
+surface_material_override/0 = SubResource("Mat_wall")
+
+[node name="FrontWall" type="MeshInstance3D" parent="Room"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.65, 5)
+mesh = SubResource("BoxMesh_wall_back")
+surface_material_override/0 = SubResource("Mat_wall")
+
+[node name="Ceiling" type="MeshInstance3D" parent="Room"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.5, 0)
+mesh = SubResource("BoxMesh_floor")
+surface_material_override/0 = SubResource("Mat_wall")
+
+[node name="KitchenCounter" type="MeshInstance3D" parent="Room"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0.5, -4)
+mesh = SubResource("BoxMesh_counter")
+surface_material_override/0 = SubResource("Mat_counter")
+
+[node name="Couch" type="MeshInstance3D" parent="Room"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0.35, -1)
+mesh = SubResource("BoxMesh_couch")
+surface_material_override/0 = SubResource("Mat_couch")
+
+[node name="Table" type="MeshInstance3D" parent="Room"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0.4, 0)
+mesh = SubResource("BoxMesh_table")
+surface_material_override/0 = SubResource("Mat_table")
+
+[node name="TableLeg1" type="MeshInstance3D" parent="Room"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0.2, -0.3)
+mesh = SubResource("BoxMesh_table_leg")
+
+[node name="TableLeg2" type="MeshInstance3D" parent="Room"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0.2, -0.3)
+mesh = SubResource("BoxMesh_table_leg")
+
+[node name="TableLeg3" type="MeshInstance3D" parent="Room"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0.2, 0.3)
+mesh = SubResource("BoxMesh_table_leg")
+
+[node name="TableLeg4" type="MeshInstance3D" parent="Room"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0.2, 0.3)
+mesh = SubResource("BoxMesh_table_leg")
+
+[node name="Clues" type="Node3D" parent="."]
+
+[node name="BloodyKnife" type="Area3D" parent="Clues"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 1.05, -4)
+input_ray_pickable = true
+script = ExtResource("6_clue")
+clue_id = "bloody_knife"
+clue_display_name = "Bloody Kitchen Knife"
+examine_text = "A stainless steel kitchen knife with dried blood on the blade and handle. The blood pattern suggests it was gripped tightly. This is likely the murder weapon."
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Clues/BloodyKnife"]
+mesh = SubResource("BoxMesh_knife")
+surface_material_override/0 = SubResource("Mat_knife")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Clues/BloodyKnife"]
+shape = SubResource("BoxShape3D_clue")
+
+[node name="Label3D" type="Label3D" parent="Clues/BloodyKnife"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+text = "[E] Examine"
+font_size = 24
+modulate = Color(1, 1, 0.6, 1)
+billboard = 1
+
+[node name="BrokenWindowLatch" type="Area3D" parent="Clues"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 2.2, -4.85)
+input_ray_pickable = true
+script = ExtResource("6_clue")
+clue_id = "broken_window_latch"
+clue_display_name = "Broken Window Latch"
+examine_text = "The window latch is broken from the inside. Someone wanted it to look like a break-in, but the damage pattern is wrong. This was staged."
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Clues/BrokenWindowLatch"]
+mesh = SubResource("BoxMesh_latch")
+surface_material_override/0 = SubResource("Mat_latch")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Clues/BrokenWindowLatch"]
+shape = SubResource("BoxShape3D_clue")
+
+[node name="Label3D" type="Label3D" parent="Clues/BrokenWindowLatch"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+text = "[E] Examine"
+font_size = 24
+modulate = Color(1, 1, 0.6, 1)
+billboard = 1
+
+[node name="MuddyFootprints" type="Area3D" parent="Clues"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, 2)
+input_ray_pickable = true
+script = ExtResource("6_clue")
+clue_id = "muddy_footprints"
+clue_display_name = "Muddy Footprints"
+examine_text = "Size 10 boot prints in dried mud leading from the front door to the kitchen. The mud matches the garden outside. The killer used the front door, not the window."
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Clues/MuddyFootprints"]
+mesh = SubResource("BoxMesh_footprint")
+surface_material_override/0 = SubResource("Mat_footprint")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Clues/MuddyFootprints"]
+shape = SubResource("BoxShape3D_clue")
+
+[node name="Label3D" type="Label3D" parent="Clues/MuddyFootprints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+text = "[E] Examine"
+font_size = 24
+modulate = Color(1, 1, 0.6, 1)
+billboard = 1
+
+[node name="VictimPhone" type="Area3D" parent="Clues"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0.05, -0.5)
+input_ray_pickable = true
+script = ExtResource("6_clue")
+clue_id = "victim_phone"
+clue_display_name = "Victim's Phone"
+examine_text = "A smartphone hidden under the couch. Last call at 11:47 PM from an unknown number. Three missed calls from 'M. Sullivan'. Text history was recently deleted."
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Clues/VictimPhone"]
+mesh = SubResource("BoxMesh_phone")
+surface_material_override/0 = SubResource("Mat_phone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Clues/VictimPhone"]
+shape = SubResource("BoxShape3D_clue")
+
+[node name="Label3D" type="Label3D" parent="Clues/VictimPhone"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+text = "[E] Examine"
+font_size = 24
+modulate = Color(1, 1, 0.6, 1)
+billboard = 1
+
+[node name="TornPhotograph" type="Area3D" parent="Clues"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 0.3, -2)
+input_ray_pickable = true
+script = ExtResource("6_clue")
+clue_id = "torn_photograph"
+clue_display_name = "Torn Photograph"
+examine_text = "A photograph torn in half, found in the bedroom trash. The visible half shows the victim smiling at a restaurant. Someone else has been torn away deliberately."
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Clues/TornPhotograph"]
+mesh = SubResource("BoxMesh_photo")
+surface_material_override/0 = SubResource("Mat_photo")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Clues/TornPhotograph"]
+shape = SubResource("BoxShape3D_clue")
+
+[node name="Label3D" type="Label3D" parent="Clues/TornPhotograph"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+text = "[E] Examine"
+font_size = 24
+modulate = Color(1, 1, 0.6, 1)
+billboard = 1
+
+[node name="WoundReport" type="Area3D" parent="Clues"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0.45, 0)
+input_ray_pickable = true
+script = ExtResource("6_clue")
+clue_id = "victim_wound_report"
+clue_display_name = "Victim Wound Report"
+examine_text = "A preliminary report on the table: Single stab wound to the abdomen. The wound angle suggests a right-handed attacker facing the victim directly."
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Clues/WoundReport"]
+mesh = SubResource("BoxMesh_report")
+surface_material_override/0 = SubResource("Mat_report")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Clues/WoundReport"]
+shape = SubResource("BoxShape3D_clue")
+
+[node name="Label3D" type="Label3D" parent="Clues/WoundReport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+text = "[E] Examine"
+font_size = 24
+modulate = Color(1, 1, 0.6, 1)
+billboard = 1
+
+[node name="HUD" parent="." instance=ExtResource("2_hud")]
+
+[node name="DialogueUI" parent="." instance=ExtResource("3_dui")]
+
+[node name="QTESystem" parent="." instance=ExtResource("4_qte")]
+
+[node name="DeductionBoard" parent="." instance=ExtResource("5_db")]
+
+[node name="PauseOverlay" type="CanvasLayer" parent="."]
+script = ExtResource("9_pause")
+
+[node name="ChapterLabel" type="CanvasLayer" parent="."]
+layer = 2
+
+[node name="Label" type="Label" parent="ChapterLabel"]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -250.0
+offset_top = -35.0
+offset_right = 250.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "CHAPTER 1: The Silent Witness — Apartment 4B"
+horizontal_alignment = 1

@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  build:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: echoes-of-eleven-build
+    volumes:
+      - .:/app
+      - build-cache:/root/.cache
+      - godot-templates:/root/.local/share/godot
+    environment:
+      - DISPLAY=${DISPLAY}
+    working_dir: /app
+    command: bash -c "chmod +x build.sh && ./build.sh"
+
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: echoes-of-eleven-dev
+    volumes:
+      - .:/app
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - build-cache:/root/.cache
+      - godot-templates:/root/.local/share/godot
+    environment:
+      - DISPLAY=${DISPLAY}
+      - GODOT=/opt/godot/Godot_v4.3-stable_linux.x86_64
+    working_dir: /app
+    stdin_open: true
+    tty: true
+    command: /bin/bash
+
+  runtime:
+    image: ubuntu:22.04
+    container_name: echoes-of-eleven
+    volumes:
+      - ./dist/linux:/game
+    environment:
+      - LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu
+    working_dir: /game
+    command: /game/echoes_of_eleven
+    ports:
+      - "8080:8080"
+
+volumes:
+  build-cache:
+  godot-templates:

@@ -1,0 +1,79 @@
+[gd_scene load_steps=2 format=3 uid="uid://deduction_board"]
+
+[ext_resource type="Script" path="res://scripts/ui/deduction_board.gd" id="1_db"]
+
+[node name="DeductionBoard" type="CanvasLayer"]
+layer = 20
+script = ExtResource("1_db")
+
+[node name="BoardPanel" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 50.0
+offset_top = 50.0
+offset_right = -50.0
+offset_bottom = -50.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="BoardPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="BoardPanel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Header" type="HBoxContainer" parent="BoardPanel/MarginContainer/VBox"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="BoardPanel/MarginContainer/VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "📋 EVIDENCE BOARD"
+
+[node name="CloseButton" type="Button" parent="BoardPanel/MarginContainer/VBox/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(100, 0)
+text = "Close [I]"
+
+[node name="HSplit" type="HSplitContainer" parent="BoardPanel/MarginContainer/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ScrollContainer" type="ScrollContainer" parent="BoardPanel/MarginContainer/VBox/HSplit"]
+layout_mode = 2
+custom_minimum_size = Vector2(300, 0)
+
+[node name="ClueList" type="VBoxContainer" parent="BoardPanel/MarginContainer/VBox/HSplit/ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 5
+
+[node name="DetailPanel" type="PanelContainer" parent="BoardPanel/MarginContainer/VBox/HSplit"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.0
+
+[node name="DetailLabel" type="RichTextLabel" parent="BoardPanel/MarginContainer/VBox/HSplit/DetailPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Select a clue to view details.
+
+Press [I] to open/close the Evidence Board.
+Select two clues to try connecting them."
+bbcode_enabled = true
+
+[node name="ConnectionsLabel" type="Label" parent="BoardPanel/MarginContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = ""
+horizontal_alignment = 1

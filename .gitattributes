@@ -1,0 +1,60 @@
+# Git attributes for Detective Chronicles
+# Ensures proper handling of binary and text files
+
+# Godot files
+*.gdscript text eol=lf
+*.gd text eol=lf
+*.tscn text eol=lf
+*.tres text eol=lf
+*.godot text eol=lf
+project.godot text eol=lf
+
+# Images (binary)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.svg text eol=lf
+
+# Audio (binary)
+*.ogg binary
+*.mp3 binary
+*.wav binary
+*.aac binary
+
+# Models (binary)
+*.fbx binary
+*.gltf binary
+*.glb binary
+*.blend binary
+
+# Video (binary)
+*.mp4 binary
+*.webm binary
+*.mov binary
+
+# Executables (binary)
+*.exe binary
+*.dmg binary
+*.zip binary
+
+# Documentation
+*.md text eol=lf
+*.txt text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.toml text eol=lf
+
+# Scripts
+*.sh text eol=lf
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Exclude from archives
+.gitignore export-ignore
+.gitattributes export-ignore
+.github export-ignore
+build.sh export-ignore
+optimize_low_end.sh export-ignore

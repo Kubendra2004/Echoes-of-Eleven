@@ -1,0 +1,57 @@
+[gd_scene load_steps=2 format=3 uid="uid://dialogue_ui"]
+
+[ext_resource type="Script" path="res://scripts/ui/dialogue_ui.gd" id="1_dui"]
+
+[node name="DialogueUI" type="CanvasLayer"]
+layer = 10
+script = ExtResource("1_dui")
+
+[node name="DialoguePanel" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = -220.0
+offset_right = -40.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="DialoguePanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 15
+
+[node name="VBox" type="VBoxContainer" parent="DialoguePanel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SpeakerLabel" type="Label" parent="DialoguePanel/MarginContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Speaker"
+
+[node name="TextLabel" type="RichTextLabel" parent="DialoguePanel/MarginContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 80)
+text = ""
+fit_content = true
+scroll_active = false
+
+[node name="ContinueIndicator" type="Label" parent="DialoguePanel/MarginContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "▼ Click to continue"
+horizontal_alignment = 2
+
+[node name="ChoicesContainer" type="VBoxContainer" parent="DialoguePanel/MarginContainer/VBox"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 5

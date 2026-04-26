@@ -1,0 +1,47 @@
+[gd_scene load_steps=2 format=3 uid="uid://qte_system"]
+
+[ext_resource type="Script" path="res://scripts/systems/qte_system.gd" id="1_qte"]
+
+[node name="QTESystem" type="CanvasLayer"]
+layer = 15
+script = ExtResource("1_qte")
+
+[node name="QTEPanel" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -100.0
+offset_right = 200.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="QTEPanel"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="PromptLabel" type="Label" parent="QTEPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "PRESS SPACE!"
+horizontal_alignment = 1
+
+[node name="TimerBar" type="ProgressBar" parent="QTEPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 30)
+max_value = 100.0
+value = 100.0
+show_percentage = false
+
+[node name="ResultLabel" type="Label" parent="QTEPanel/VBox"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+text = ""
+horizontal_alignment = 1

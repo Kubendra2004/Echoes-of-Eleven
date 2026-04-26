@@ -1,0 +1,30 @@
+# itch.io manifest for Detective Chronicles
+# Use with: butler push ./dist/linux ./[your-itch-id]/detective-chronicles:linux --userversion YOUR_VERSION
+
+version=1
+title=Detective Chronicles: The Burari Deaths
+description=A psychological thriller detective game. Investigate a real unsolved crime case. Make choices that matter.
+
+# Platforms
+linux=./dist/linux/detective_chronicles
+windows=./dist/windows/detective_chronicles.exe
+macos=./dist/macos/detective_chronicles.dmg
+
+# Metadata
+genre=Thriller;Detective;Story
+tags=detective,mystery,crime,psychological-thriller,indie,godot,first-person,story-driven
+rating=m
+content_rating=Mature (17+)
+
+# Creator info
+author=Detective Chronicles Development
+license=MIT
+source=https://github.com/yourusername/detective-chronicles
+support_url=https://github.com/yourusername/detective-chronicles/issues
+
+# Release notes
+# Include in release:
+# - New Act (if available)
+# - Bug fixes
+# - Balance improvements
+# - Achievement updates
