@@ -1,18 +1,22 @@
 ## Deduction Board UI
-## Lets the player review collected clues and make connections
+## Interactive Corkboard for clues and connections
 extends CanvasLayer
 
-@onready var board_panel: PanelContainer = %BoardPanel
-@onready var clue_list: VBoxContainer = %ClueList
+@onready var corkboard_bg: ColorRect = %CorkboardBG
+@onready var lines_layer: Control = %LinesLayer
+@onready var nodes_layer: Control = %NodesLayer
 @onready var detail_label: RichTextLabel = %DetailLabel
 @onready var connections_label: Label = %ConnectionsLabel
 @onready var close_btn: Button = %CloseButton
 
 var _is_open: bool = false
 var _selected_clue_ids: Array[String] = []
+var _clue_nodes: Dictionary = {}
+
+var clue_node_scene = preload("res://scenes/investigation/clue_node.tscn")
 
 func _ready() -> void:
-	board_panel.visible = false
+	visible = false
 	close_btn.pressed.connect(_close_board)
 
 func _input(event: InputEvent) -> void:
@@ -24,75 +28,52 @@ func _input(event: InputEvent) -> void:
 
 func _open_board() -> void:
 	_is_open = true
-	board_panel.visible = true
-	_refresh_clue_list()
+	visible = true
+	_refresh_board()
 	get_tree().paused = true
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 func _close_board() -> void:
 	_is_open = false
-	board_panel.visible = false
+	visible = false
 	_selected_clue_ids.clear()
+	_update_selections()
 	get_tree().paused = false
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
-func _refresh_clue_list() -> void:
-	# Clear existing entries
-	for child in clue_list.get_children():
-		child.queue_free()
-	
+func _refresh_board() -> void:
 	var clues = ClueManager.get_collected_clues()
 	
-	if clues.is_empty():
-		var empty_label = Label.new()
-		empty_label.text = "No clues collected yet."
-		clue_list.add_child(empty_label)
-		return
-	
-	# Group by category
-	var categories = {"physical": [], "testimony": [], "document": [], "digital": []}
+	# Spawn any new clues
 	for clue_id in clues:
-		var cat = clues[clue_id].get("category", "physical")
-		if cat in categories:
-			categories[cat].append({"id": clue_id, "data": clues[clue_id]})
+		if not _clue_nodes.has(clue_id):
+			_spawn_clue_node(clue_id, clues[clue_id])
 	
-	var category_names = {
-		"physical": "🔍 Physical Evidence",
-		"testimony": "🗣 Testimonies",
-		"document": "📄 Documents",
-		"digital": "💻 Digital Evidence"
-	}
-	
-	for cat in categories:
-		if categories[cat].is_empty():
-			continue
-		
-		# Category header
-		var header = Label.new()
-		header.text = category_names.get(cat, cat)
-		clue_list.add_child(header)
-		
-		# Clue buttons
-		for entry in categories[cat]:
-			var btn = Button.new()
-			btn.text = "  " + entry["data"].get("name", entry["id"])
-			btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
-			var cid = entry["id"]
-			btn.pressed.connect(func(): _select_clue(cid))
-			clue_list.add_child(btn)
+	_draw_connections()
 
-func _select_clue(clue_id: String) -> void:
+func _spawn_clue_node(id: String, data: Dictionary) -> void:
+	var node = clue_node_scene.instantiate()
+	nodes_layer.add_child(node)
+	node.setup(id, data)
+	node.clue_clicked.connect(_on_clue_clicked)
+	node.clue_dragged.connect(_on_clue_dragged)
+	_clue_nodes[id] = node
+
+func _on_clue_dragged(clue_id: String, new_pos: Vector2) -> void:
+	# Save position
+	var clues = ClueManager.get_collected_clues()
+	if clues.has(clue_id):
+		clues[clue_id]["board_position"] = {"x": new_pos.x, "y": new_pos.y}
+	
+	_draw_connections()
+
+func _on_clue_clicked(clue_id: String) -> void:
 	var clue = ClueManager.get_clue(clue_id)
 	
 	# Show details
 	var text = "[b]%s[/b]\n\n" % clue.get("name", clue_id)
 	text += "%s\n\n" % clue.get("description", "No description.")
 	text += "[i]Found at: %s[/i]\n" % clue.get("location_found", "Unknown")
-	
-	if "collected_time" in clue:
-		text += "[i]Collected: Day %d, %02d:00[/i]" % [
-			clue["collected_time"].get("day", 0),
-			clue["collected_time"].get("hour", 0)
-		]
-	
 	detail_label.text = text
 	
 	# Handle connecting clues
@@ -101,15 +82,48 @@ func _select_clue(clue_id: String) -> void:
 	else:
 		_selected_clue_ids.append(clue_id)
 	
-	# If two clues selected, try to connect them
+	_update_selections()
+	
+	# Try to connect if 2 selected
 	if _selected_clue_ids.size() == 2:
-		var success = ClueManager.connect_clues(_selected_clue_ids[0], _selected_clue_ids[1])
+		var id1 = _selected_clue_ids[0]
+		var id2 = _selected_clue_ids[1]
+		var success = ClueManager.connect_clues(id1, id2)
+		
 		if success:
 			connections_label.text = "✓ Connection made!"
+			_draw_connections()
 		else:
 			connections_label.text = "These clues don't connect."
+			
 		_selected_clue_ids.clear()
+		_update_selections()
 		
-		# Clear message after delay
 		await get_tree().create_timer(2.0).timeout
 		connections_label.text = ""
+
+func _update_selections() -> void:
+	for id in _clue_nodes:
+		_clue_nodes[id].set_selected(id in _selected_clue_ids)
+
+func _draw_connections() -> void:
+	# Clear existing lines
+	for child in lines_layer.get_children():
+		child.queue_free()
+	
+	var connections = ClueManager.connections
+	for conn in connections:
+		var id_a = conn["a"]
+		var id_b = conn["b"]
+		
+		if _clue_nodes.has(id_a) and _clue_nodes.has(id_b):
+			var node_a = _clue_nodes[id_a]
+			var node_b = _clue_nodes[id_b]
+			
+			var line = Line2D.new()
+			line.add_point(node_a.position + node_a.size / 2)
+			line.add_point(node_b.position + node_b.size / 2)
+			line.width = 4.0
+			line.default_color = Color(0.8, 0.2, 0.2, 0.8) # Red string
+			line.antialiased = true
+			lines_layer.add_child(line)

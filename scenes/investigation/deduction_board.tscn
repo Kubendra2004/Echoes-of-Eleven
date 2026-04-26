@@ -6,74 +6,91 @@
 layer = 20
 script = ExtResource("1_db")
 
-[node name="BoardPanel" type="PanelContainer" parent="."]
+[node name="CorkboardBG" type="ColorRect" parent="."]
 unique_name_in_owner = true
-visible = false
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 50.0
-offset_top = 50.0
-offset_right = -50.0
-offset_bottom = -50.0
 grow_horizontal = 2
 grow_vertical = 2
+color = Color(0.12, 0.1, 0.08, 1)
 
-[node name="MarginContainer" type="MarginContainer" parent="BoardPanel"]
+[node name="LinesLayer" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="NodesLayer" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Overlay" type="MarginContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 30
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 30
+mouse_filter = 2
+
+[node name="TopBar" type="HBoxContainer" parent="Overlay"]
 layout_mode = 2
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 20
+size_flags_vertical = 0
+mouse_filter = 2
 
-[node name="VBox" type="VBoxContainer" parent="BoardPanel/MarginContainer"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="Header" type="HBoxContainer" parent="BoardPanel/MarginContainer/VBox"]
-layout_mode = 2
-
-[node name="Title" type="Label" parent="BoardPanel/MarginContainer/VBox/Header"]
+[node name="Title" type="Label" parent="Overlay/TopBar"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.9, 0.85, 0.8, 1)
+theme_override_font_sizes/font_size = 24
 text = "📋 EVIDENCE BOARD"
 
-[node name="CloseButton" type="Button" parent="BoardPanel/MarginContainer/VBox/Header"]
-unique_name_in_owner = true
-layout_mode = 2
-custom_minimum_size = Vector2(100, 0)
-text = "Close [I]"
-
-[node name="HSplit" type="HSplitContainer" parent="BoardPanel/MarginContainer/VBox"]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="ScrollContainer" type="ScrollContainer" parent="BoardPanel/MarginContainer/VBox/HSplit"]
-layout_mode = 2
-custom_minimum_size = Vector2(300, 0)
-
-[node name="ClueList" type="VBoxContainer" parent="BoardPanel/MarginContainer/VBox/HSplit/ScrollContainer"]
+[node name="ConnectionsLabel" type="Label" parent="Overlay/TopBar"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 5
-
-[node name="DetailPanel" type="PanelContainer" parent="BoardPanel/MarginContainer/VBox/HSplit"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_stretch_ratio = 2.0
-
-[node name="DetailLabel" type="RichTextLabel" parent="BoardPanel/MarginContainer/VBox/HSplit/DetailPanel"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Select a clue to view details.
-
-Press [I] to open/close the Evidence Board.
-Select two clues to try connecting them."
-bbcode_enabled = true
-
-[node name="ConnectionsLabel" type="Label" parent="BoardPanel/MarginContainer/VBox"]
-unique_name_in_owner = true
-layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
 text = ""
 horizontal_alignment = 1
+
+[node name="CloseButton" type="Button" parent="Overlay/TopBar"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(100, 40)
+text = "Close [I]"
+
+[node name="DetailPanel" type="PanelContainer" parent="Overlay"]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 8
+custom_minimum_size = Vector2(350, 400)
+
+[node name="Margin" type="MarginContainer" parent="Overlay/DetailPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
+
+[node name="DetailLabel" type="RichTextLabel" parent="Overlay/DetailPanel/Margin"]
+unique_name_in_owner = true
+layout_mode = 2
+bbcode_enabled = true
+text = "Select a clue to view details.
+
+Drag clues around the board.
+Click one clue, then another to connect them."

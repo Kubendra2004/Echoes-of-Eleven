@@ -1,0 +1,43 @@
+[gd_scene load_steps=3 format=3 uid="uid://clue_node"]
+
+[ext_resource type="Script" path="res://scripts/ui/clue_node.gd" id="1_cnode"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_note"]
+bg_color = Color(0.95, 0.92, 0.75, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 2
+border_width_bottom = 3
+border_color = Color(0.6, 0.58, 0.45, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 4
+shadow_offset = Vector2(2, 3)
+
+[node name="ClueNode" type="PanelContainer"]
+custom_minimum_size = Vector2(120, 120)
+offset_right = 120.0
+offset_bottom = 120.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_note")
+script = ExtResource("1_cnode")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+mouse_filter = 2
+
+[node name="NameLabel" type="Label" parent="MarginContainer"]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_colors/font_color = Color(0.1, 0.1, 0.1, 1)
+theme_override_font_sizes/font_size = 14
+text = "Clue Name"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
