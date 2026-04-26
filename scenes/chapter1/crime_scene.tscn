@@ -445,7 +445,6 @@ billboard = 1
 
 [node name="PauseOverlay" type="CanvasLayer" parent="."]
 script = ExtResource("9_pause")
-[ext_resource type="Script" path="res://scripts/systems/police_lights.gd" id="10_plights"]
 
 [node name="ChapterLabel" type="CanvasLayer" parent="."]
 layer = 2
