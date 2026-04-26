@@ -93,9 +93,13 @@ func get_clues_by_category(category: String) -> Array[Dictionary]:
 			result.append(collected_clues[clue_id])
 	return result
 
-## Connect two clues on the deduction board
+## Connect two clues on the deduction board.
+## Always succeeds if both clues are collected and not already connected.
+## Returns true if the connection was newly made, false if it already existed.
 func connect_clues(clue_a: String, clue_b: String) -> bool:
 	if not has_clue(clue_a) or not has_clue(clue_b):
+		return false
+	if clue_a == clue_b:
 		return false
 	
 	# Check if connection already exists
@@ -107,7 +111,7 @@ func connect_clues(clue_a: String, clue_b: String) -> bool:
 	connections.append({"a": clue_a, "b": clue_b})
 	clue_connection_made.emit(clue_a, clue_b)
 	
-	# Check if this connection unlocks a deduction
+	# Check if this connection unlocks a canonical deduction
 	_check_deductions()
 	return true
 

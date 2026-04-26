@@ -1,161 +1,290 @@
 ## Deduction Board UI
-## Interactive Corkboard for clues and connections
+## Interactive corkboard — drag clues, click two to connect with red string.
+## Works automatically for all current and future clues.
 extends CanvasLayer
 
-@onready var corkboard_bg: ColorRect = %CorkboardBG
-@onready var lines_layer: Control = %LinesLayer
-@onready var nodes_layer: Control = %NodesLayer
-@onready var detail_label: RichTextLabel = %DetailLabel
-@onready var connections_label: Label = %ConnectionsLabel
-@onready var close_btn: Button = %CloseButton
+# --- Scene refs (built from actual .tscn node tree) ---
+@onready var lines_layer: Control  = $LinesLayer
+@onready var nodes_layer: Control  = $NodesLayer
+@onready var close_btn: Button     = $Overlay/MarginContainer/VBoxContainer/Header/CloseButton
+@onready var detail_label: RichTextLabel = $Overlay/MarginContainer/VBoxContainer/DetailPanel/MarginContainer/DetailLabel
+@onready var connections_label: Label    = $Overlay/MarginContainer/VBoxContainer/ConnectionsLabel
 
+# --- State ---
 var _is_open: bool = false
-var _selected_clue_ids: Array[String] = []
-var _clue_nodes: Dictionary = {}
+var _clue_nodes: Dictionary = {}          # clue_id  → Control node
+var _selected: Array[String] = []         # up to 2 selected clue IDs
+var _connecting_mode: bool = false        # true while waiting for 2nd clue
 
-var clue_node_scene = preload("res://scenes/investigation/clue_node.tscn")
-
+# ─────────────────────────────────────────────
 func _ready() -> void:
 	visible = false
 	close_btn.pressed.connect(_close_board)
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("inventory"):
-		if _is_open:
-			_close_board()
-		else:
-			_open_board()
+		if _is_open: _close_board()
+		else:        _open_board()
 
+# ─────────────────────────────────────────────
 func _open_board() -> void:
 	_is_open = true
-	visible = true
+	visible  = true
 	_refresh_board()
-	
-	# Await one frame to ensure Godot UI layout pass completes before pausing
-	await get_tree().process_frame
-	
+	await get_tree().process_frame   # let layout pass finish
 	get_tree().paused = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 func _close_board() -> void:
 	_is_open = false
-	visible = false
-	_selected_clue_ids.clear()
+	visible  = false
+	_selected.clear()
 	_update_selections()
 	get_tree().paused = false
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
+# ─────────────────────────────────────────────
+## Spawns any newly-collected clues, draws all connections.
+## Safe to call repeatedly — only spawns clues not yet on board.
 func _refresh_board() -> void:
-	
-	# DEBUG: FORCE SPAWN A DUMMY CLUE
-	if not _clue_nodes.has("debug_dummy"):
-		_spawn_clue_node("debug_dummy", {"name": "DEBUG CLUE", "description": "If you see this, rendering works."})
-
 	var clues = ClueManager.get_collected_clues()
-
-	var file = FileAccess.open("user://debug_board.txt", FileAccess.WRITE)
-	if file:
-		file.store_string("Refresh called!\n")
-		file.store_string("Clues found: " + str(clues.size()) + "\n")
-		var child_count = nodes_layer.get_child_count()
-		file.store_string("NodesLayer children before: " + str(child_count) + "\n")
-		file.store_string("Clues: " + str(clues) + "\n")
-
-	
-	# Spawn any new clues
 	for clue_id in clues:
 		if not _clue_nodes.has(clue_id):
 			_spawn_clue_node(clue_id, clues[clue_id])
-	
 	_draw_connections()
 
+# ─────────────────────────────────────────────
+## Builds a sticky-note Control node entirely in code.
+## No .tscn file needed — works for all future clues automatically.
 func _spawn_clue_node(id: String, data: Dictionary) -> void:
-	var node = clue_node_scene.instantiate()
-	nodes_layer.add_child(node)
-	node.setup(id, data)
+	var node = Control.new()
+	node.custom_minimum_size = Vector2(150, 160)
+	node.size = Vector2(150, 160)
+
+	# Position: restore saved or scatter randomly across board
+	var pos_data = data.get("board_position", null)
+	if pos_data and typeof(pos_data) == TYPE_DICTIONARY:
+		node.position = Vector2(pos_data.get("x", 100.0), pos_data.get("y", 100.0))
+	else:
+		# Scatter in a grid-like pattern to avoid overlap
+		var idx = _clue_nodes.size()
+		var col = idx % 5
+		var row = idx / 5
+		node.position = Vector2(80.0 + col * 170.0, 80.0 + row * 180.0)
+
+	node.rotation_degrees = randf_range(-5.0, 5.0)
+	node.z_index = 1
+	node.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+
+	# Yellow paper background
+	var bg = ColorRect.new()
+	bg.color = Color(0.96, 0.93, 0.72, 1.0)
+	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	node.add_child(bg)
+
+	# Shadow strip at top (like a pinned note)
+	var pin_strip = ColorRect.new()
+	pin_strip.color = Color(0.85, 0.82, 0.60, 1.0)
+	pin_strip.set_anchor_and_offset(SIDE_LEFT,   0, 0)
+	pin_strip.set_anchor_and_offset(SIDE_RIGHT,  1, 0)
+	pin_strip.set_anchor_and_offset(SIDE_TOP,    0, 0)
+	pin_strip.set_anchor_and_offset(SIDE_BOTTOM, 0, 18)
+	pin_strip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	node.add_child(pin_strip)
+
+	# Category coloured dot
+	var category_colors = {
+		"physical":  Color(0.8, 0.3, 0.3, 1.0),
+		"document":  Color(0.3, 0.5, 0.8, 1.0),
+		"testimony": Color(0.3, 0.7, 0.4, 1.0),
+		"digital":   Color(0.6, 0.3, 0.8, 1.0),
+	}
+	var cat = data.get("category", "physical")
+	var dot = ColorRect.new()
+	dot.color = category_colors.get(cat, Color(0.5, 0.5, 0.5, 1.0))
+	dot.set_anchor_and_offset(SIDE_LEFT,   0,  6)
+	dot.set_anchor_and_offset(SIDE_RIGHT,  0, 16)
+	dot.set_anchor_and_offset(SIDE_TOP,    0,  5)
+	dot.set_anchor_and_offset(SIDE_BOTTOM, 0, 15)
+	dot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	node.add_child(dot)
+
+	# Clue name label
+	var margin = MarginContainer.new()
+	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+	margin.add_theme_constant_override("margin_left",   10)
+	margin.add_theme_constant_override("margin_right",  10)
+	margin.add_theme_constant_override("margin_top",    22)
+	margin.add_theme_constant_override("margin_bottom",  8)
+	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	node.add_child(margin)
+
+	var label = Label.new()
+	label.text = data.get("name", id)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment   = VERTICAL_ALIGNMENT_CENTER
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	label.add_theme_color_override("font_color", Color(0.12, 0.08, 0.04, 1.0))
+	label.add_theme_font_size_override("font_size", 13)
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	margin.add_child(label)
+
+	# Selection ring (hidden by default)
+	var ring = ColorRect.new()
+	ring.name = "SelectionRing"
+	ring.color = Color(1.0, 0.85, 0.1, 0.0)   # transparent initially
+	ring.set_anchors_preset(Control.PRESET_FULL_RECT)
+	ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ring.z_index = -1  # behind content
+	node.add_child(ring)
+
+	# Attach the interaction script
+	var script = GDScript.new()
+	script.source_code = """
+extends Control
+
+var clue_id: String = ""
+var _dragging: bool = false
+var _drag_offset: Vector2 = Vector2.ZERO
+
+signal clue_clicked(id: String)
+signal clue_dragged(id: String, pos: Vector2)
+
+func _gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			_dragging = true
+			_drag_offset = get_global_mouse_position() - global_position
+			z_index = 100
+		else:
+			_dragging = false
+			z_index = 1
+			clue_dragged.emit(clue_id, position)
+			clue_clicked.emit(clue_id)
+	elif event is InputEventMouseMotion and _dragging:
+		global_position = get_global_mouse_position() - _drag_offset
+		clue_dragged.emit(clue_id, position)
+
+func set_selected(selected: bool) -> void:
+	var ring = get_node_or_null("SelectionRing")
+	if selected:
+		modulate = Color(1.0, 1.0, 0.7, 1.0)
+		z_index = 50
+		if ring: ring.color = Color(1.0, 0.85, 0.1, 0.4)
+	else:
+		modulate = Color(1, 1, 1, 1)
+		z_index = 1
+		if ring: ring.color = Color(1.0, 0.85, 0.1, 0.0)
+"""
+	script.reload()
+	node.set_script(script)
+	node.clue_id = id
 	node.clue_clicked.connect(_on_clue_clicked)
 	node.clue_dragged.connect(_on_clue_dragged)
+
+	add_child(node)
 	_clue_nodes[id] = node
 
+# ─────────────────────────────────────────────
+func _on_clue_clicked(clue_id: String) -> void:
+	# Show detail panel
+	var clue = ClueManager.get_clue(clue_id)
+	var cat_icon = {"physical": "🔍", "document": "📄", "testimony": "💬", "digital": "📱"}
+	var cat = clue.get("category", "physical")
+	var txt = "[b]%s %s[/b]\n\n" % [cat_icon.get(cat, "🔍"), clue.get("name", clue_id)]
+	txt += "%s\n\n" % clue.get("description", "No description available.")
+	txt += "[i]📍 Found at: %s[/i]" % clue.get("location_found", "Unknown location")
+	if detail_label:
+		detail_label.text = txt
+
+	# Selection toggle
+	if clue_id in _selected:
+		_selected.erase(clue_id)
+		_update_selections()
+		_connecting_mode = false
+		if connections_label:
+			connections_label.text = ""
+		return
+
+	_selected.append(clue_id)
+	_update_selections()
+
+	if _selected.size() == 1:
+		# First clue selected — prompt for second
+		_connecting_mode = true
+		if connections_label:
+			connections_label.text = "🔗 Select a second clue to connect..."
+
+	elif _selected.size() == 2:
+		# Attempt connection
+		_connecting_mode = false
+		var id1 = _selected[0]
+		var id2 = _selected[1]
+		_selected.clear()
+
+		var success = ClueManager.connect_clues(id1, id2)
+		_update_selections()
+		_draw_connections()
+
+		if success:
+			if connections_label:
+				connections_label.text = "✅ Connection made!"
+		else:
+			# Already connected — still draw (may have been loaded from save)
+			if connections_label:
+				connections_label.text = "↩ Already connected (or no logical link)."
+
+		await get_tree().create_timer(2.5).timeout
+		if connections_label and not _connecting_mode:
+			connections_label.text = ""
+
 func _on_clue_dragged(clue_id: String, new_pos: Vector2) -> void:
-	# Save position
-	
-	# DEBUG: FORCE SPAWN A DUMMY CLUE
-	if not _clue_nodes.has("debug_dummy"):
-		_spawn_clue_node("debug_dummy", {"name": "DEBUG CLUE", "description": "If you see this, rendering works."})
-
+	# Persist the updated board position
 	var clues = ClueManager.get_collected_clues()
-
-	var file = FileAccess.open("user://debug_board.txt", FileAccess.WRITE)
-	if file:
-		file.store_string("Refresh called!\n")
-		file.store_string("Clues found: " + str(clues.size()) + "\n")
-		var child_count = nodes_layer.get_child_count()
-		file.store_string("NodesLayer children before: " + str(child_count) + "\n")
-		file.store_string("Clues: " + str(clues) + "\n")
-
 	if clues.has(clue_id):
 		clues[clue_id]["board_position"] = {"x": new_pos.x, "y": new_pos.y}
-	
+	# Redraw strings live so they follow the note
 	_draw_connections()
 
-func _on_clue_clicked(clue_id: String) -> void:
-	var clue = ClueManager.get_clue(clue_id)
-	
-	# Show details
-	var text = "[b]%s[/b]\n\n" % clue.get("name", clue_id)
-	text += "%s\n\n" % clue.get("description", "No description.")
-	text += "[i]Found at: %s[/i]\n" % clue.get("location_found", "Unknown")
-	detail_label.text = text
-	
-	# Handle connecting clues
-	if clue_id in _selected_clue_ids:
-		_selected_clue_ids.erase(clue_id)
-	else:
-		_selected_clue_ids.append(clue_id)
-	
-	_update_selections()
-	
-	# Try to connect if 2 selected
-	if _selected_clue_ids.size() == 2:
-		var id1 = _selected_clue_ids[0]
-		var id2 = _selected_clue_ids[1]
-		var success = ClueManager.connect_clues(id1, id2)
-		
-		if success:
-			connections_label.text = "✓ Connection made!"
-			_draw_connections()
-		else:
-			connections_label.text = "These clues don't connect."
-			
-		_selected_clue_ids.clear()
-		_update_selections()
-		
-		await get_tree().create_timer(2.0).timeout
-		connections_label.text = ""
-
+# ─────────────────────────────────────────────
 func _update_selections() -> void:
 	for id in _clue_nodes:
-		_clue_nodes[id].set_selected(id in _selected_clue_ids)
+		_clue_nodes[id].set_selected(id in _selected)
 
+## Redraws ALL red strings from ClueManager.connections.
+## Called after every drag, click, and board open.
 func _draw_connections() -> void:
-	# Clear existing lines
 	for child in lines_layer.get_children():
 		child.queue_free()
-	
-	var connections = ClueManager.connections
-	for conn in connections:
-		var id_a = conn["a"]
-		var id_b = conn["b"]
-		
-		if _clue_nodes.has(id_a) and _clue_nodes.has(id_b):
-			var node_a = _clue_nodes[id_a]
-			var node_b = _clue_nodes[id_b]
-			
-			var line = Line2D.new()
-			line.add_point(node_a.position + node_a.size / 2)
-			line.add_point(node_b.position + node_b.size / 2)
-			line.width = 4.0
-			line.default_color = Color(0.8, 0.2, 0.2, 0.8) # Red string
-			line.antialiased = true
-			lines_layer.add_child(line)
+
+	for conn in ClueManager.connections:
+		var id_a: String = conn.get("a", "")
+		var id_b: String = conn.get("b", "")
+		if id_a.is_empty() or id_b.is_empty():
+			continue
+		if not (_clue_nodes.has(id_a) and _clue_nodes.has(id_b)):
+			continue
+
+		var node_a: Control = _clue_nodes[id_a]
+		var node_b: Control = _clue_nodes[id_b]
+		var center_a = node_a.position + node_a.size * 0.5
+		var center_b = node_b.position + node_b.size * 0.5
+
+		# Shadow line for depth effect
+		var shadow = Line2D.new()
+		shadow.add_point(center_a + Vector2(2, 2))
+		shadow.add_point(center_b + Vector2(2, 2))
+		shadow.width = 5.0
+		shadow.default_color = Color(0.0, 0.0, 0.0, 0.25)
+		shadow.antialiased = true
+		lines_layer.add_child(shadow)
+
+		# Main red string
+		var line = Line2D.new()
+		line.add_point(center_a)
+		line.add_point(center_b)
+		line.width = 3.0
+		line.default_color = Color(0.85, 0.18, 0.18, 0.9)
+		line.antialiased = true
+		lines_layer.add_child(line)
