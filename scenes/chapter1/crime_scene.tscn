@@ -9,6 +9,7 @@
 [ext_resource type="Script" path="res://scripts/systems/detective_camera.gd" id="7_cam"]
 [ext_resource type="Script" path="res://scripts/systems/fps_interaction.gd" id="8_fps"]
 [ext_resource type="Script" path="res://scripts/ui/pause_overlay.gd" id="9_pause"]
+[ext_resource type="Script" path="res://scripts/systems/police_lights.gd" id="10_plights"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_floor"]
 size = Vector3(12, 0.2, 10)
