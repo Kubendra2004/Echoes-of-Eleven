@@ -9,8 +9,23 @@ extends Camera3D
 @export var room_min_z: float = -4.7
 @export var room_max_z: float = 4.7
 
-var _rotation_x: float = 0.0
-var _rotation_y: float = 0.0
+# Smooth Look
+@export var look_smoothness: float = 15.0
+var _target_rotation_x: float = 0.0
+var _target_rotation_y: float = 0.0
+var _current_rotation_x: float = 0.0
+var _current_rotation_y: float = 0.0
+
+# Smooth Movement
+@export var move_smoothness: float = 10.0
+var _current_velocity: Vector3 = Vector3.ZERO
+
+# Head Bobbing
+@export var bob_frequency: float = 2.0
+@export var bob_amplitude: float = 0.05
+var _bob_timer: float = 0.0
+var _base_y: float = 1.7
+
 var _mouse_captured: bool = false
 
 func _ready() -> void:
@@ -20,8 +35,11 @@ func _ready() -> void:
 	_mouse_captured = true
 	
 	# Set initial rotation from current transform
-	_rotation_y = rotation.y
-	_rotation_x = rotation.x
+	_current_rotation_y = rotation.y
+	_current_rotation_x = rotation.x
+	_target_rotation_y = rotation.y
+	_target_rotation_x = rotation.x
+	_base_y = global_position.y
 
 func _input(event: InputEvent) -> void:
 	if get_tree().paused:
@@ -40,6 +58,11 @@ func _input(event: InputEvent) -> void:
 		else:
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 			_mouse_captured = true
+			
+	if _mouse_captured and event is InputEventMouseMotion:
+		_target_rotation_y -= event.relative.x * mouse_sensitivity
+		_target_rotation_x -= event.relative.y * mouse_sensitivity
+		_target_rotation_x = clampf(_target_rotation_x, -PI / 2.2, PI / 2.2)
 
 func _physics_process(delta: float) -> void:
 	_mouse_captured = Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
@@ -49,16 +72,13 @@ func _physics_process(delta: float) -> void:
 
 	# Don't move during dialogue.
 	if DialogueManager.is_dialogue_active():
+		_current_velocity = _current_velocity.lerp(Vector3.ZERO, move_smoothness * delta)
 		return
 
-	# Mouse look is processed every frame to avoid key-hold input conflicts.
-	if _mouse_captured:
-		var mouse_velocity = Input.get_last_mouse_velocity()
-		if mouse_velocity.length_squared() > 0.0001:
-			_rotation_y -= mouse_velocity.x * mouse_sensitivity * delta
-			_rotation_x -= mouse_velocity.y * mouse_sensitivity * delta
-			_rotation_x = clampf(_rotation_x, -PI / 2.2, PI / 2.2)
-			rotation = Vector3(_rotation_x, _rotation_y, 0)
+	# Smooth Look Application
+	_current_rotation_x = lerpf(_current_rotation_x, _target_rotation_x, look_smoothness * delta)
+	_current_rotation_y = lerpf(_current_rotation_y, _target_rotation_y, look_smoothness * delta)
+	rotation = Vector3(_current_rotation_x, _current_rotation_y, 0)
 
 	var input_dir = Vector3.ZERO
 
@@ -72,26 +92,57 @@ func _physics_process(delta: float) -> void:
 	if Input.is_physical_key_pressed(KEY_D) or Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT):
 		input_dir.x += 1
 	
+	var target_velocity = Vector3.ZERO
+	var is_moving = false
+	var is_sprinting = false
+	
 	if input_dir != Vector3.ZERO:
 		input_dir = input_dir.normalized()
+		is_moving = true
 		
 		# Move relative to camera direction (but keep Y level)
 		var forward = -global_transform.basis.z
 		forward.y = 0
-		forward = forward.normalized()
+		if forward.length_squared() > 0:
+			forward = forward.normalized()
+			
 		var right = global_transform.basis.x
 		right.y = 0
-		right = right.normalized()
+		if right.length_squared() > 0:
+			right = right.normalized()
 		
-		var velocity = (forward * -input_dir.z + right * input_dir.x)
+		target_velocity = (forward * -input_dir.z + right * input_dir.x)
 		
 		var speed = move_speed
 		if Input.is_key_pressed(KEY_SHIFT) or Input.is_key_pressed(KEY_CTRL):
 			speed *= sprint_multiplier
+			is_sprinting = true
+			
+		target_velocity *= speed
 		
-		global_position += velocity * speed * delta
+	# Smooth Movement Application
+	_current_velocity = _current_velocity.lerp(target_velocity, move_smoothness * delta)
+	
+	var pos = global_position
+	pos += _current_velocity * delta
+	
+	# Head Bobbing
+	if is_moving:
+		var speed_factor = sprint_multiplier if is_sprinting else 1.0
+		_bob_timer += delta * bob_frequency * speed_factor
+		var bob_offset = sin(_bob_timer * PI * 2) * bob_amplitude
+		pos.y = _base_y + bob_offset
 		
-		# Keep camera at eye height
-		global_position.y = clampf(global_position.y, 1.5, 2.5)
-		global_position.x = clampf(global_position.x, room_min_x, room_max_x)
-		global_position.z = clampf(global_position.z, room_min_z, room_max_z)
+		# FOV dynamic effect
+		fov = lerpf(fov, 75.0 if is_sprinting else 70.0, 5.0 * delta)
+	else:
+		_bob_timer = 0.0
+		pos.y = lerpf(pos.y, _base_y, move_smoothness * delta)
+		fov = lerpf(fov, 70.0, 5.0 * delta)
+		
+	# Clamping
+	pos.y = clampf(pos.y, 1.5, 2.5)
+	pos.x = clampf(pos.x, room_min_x, room_max_x)
+	pos.z = clampf(pos.z, room_min_z, room_max_z)
+	
+	global_position = pos

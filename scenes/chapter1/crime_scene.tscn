@@ -92,9 +92,20 @@ size = Vector3(0.06, 0.4, 0.06)
 ambient_light_source = 1
 ambient_light_color = Color(0.76, 0.82, 0.92, 1)
 ambient_light_energy = 1.15
+tonemap_mode = 3
+ssr_enabled = true
+ssao_enabled = true
+ssao_radius = 1.5
+ssao_intensity = 2.5
+ssil_enabled = true
+sdfgi_enabled = true
+sdfgi_use_occlusion = true
 fog_enabled = true
 fog_light_color = Color(0.62, 0.7, 0.85, 1)
 fog_density = 0.004
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.02
+volumetric_fog_albedo = Color(0.6, 0.7, 0.85, 1)
 
 [node name="CrimeScene" type="Node3D"]
 script = ExtResource("1_ch1")
