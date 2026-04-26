@@ -28,6 +28,9 @@ func setup(id: String, data: Dictionary) -> void:
 	else:
 		# Random spawn position if none saved
 		position = Vector2(randf_range(100, 600), randf_range(100, 400))
+		
+	# Random messy rotation
+	rotation_degrees = randf_range(-4.0, 4.0)
 
 func set_selected(selected: bool) -> void:
 	if selected:
