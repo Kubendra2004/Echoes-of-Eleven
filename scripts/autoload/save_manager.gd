@@ -71,7 +71,12 @@ func load_game(slot: int = 1) -> bool:
 	# Restore ClueManager
 	var clues = data.get("clues", {})
 	ClueManager.collected_clues = clues.get("collected", {})
-	ClueManager.connections = clues.get("connections", [])
+	
+	ClueManager.connections.clear()
+	var loaded_conns = clues.get("connections", [])
+	for conn in loaded_conns:
+		ClueManager.connections.append(conn)
+		
 	ClueManager.deductions = clues.get("deductions", {})
 	
 	# Load the saved scene
