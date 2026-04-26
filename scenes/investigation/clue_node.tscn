@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=3 uid="uid://clue_node"]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/clue_node.gd" id="1_cnode"]
 

@@ -21,6 +21,9 @@ func setup(id: String, data: Dictionary) -> void:
 	clue_id = id
 	clue_name = data.get("name", id)
 	
+	if name_label:
+		name_label.text = clue_name
+	
 	# Try to restore saved position
 	var pos_data = data.get("board_position", null)
 	if pos_data and typeof(pos_data) == TYPE_DICTIONARY:
