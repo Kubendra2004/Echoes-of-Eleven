@@ -28,6 +28,9 @@ var _base_y: float = 1.7
 
 var _mouse_captured: bool = false
 
+# Flashlight
+var _flashlight: SpotLight3D
+
 func _ready() -> void:
 	current = true
 	# Capture mouse for FPS-style look
@@ -40,6 +43,17 @@ func _ready() -> void:
 	_target_rotation_y = rotation.y
 	_target_rotation_x = rotation.x
 	_base_y = global_position.y
+	
+	# Initialize Flashlight
+	_flashlight = SpotLight3D.new()
+	add_child(_flashlight)
+	_flashlight.position = Vector3(0.2, -0.2, -0.2) # Offset slightly from center
+	_flashlight.light_energy = 3.5
+	_flashlight.spot_angle = 40.0
+	_flashlight.spot_range = 20.0
+	_flashlight.shadow_enabled = true
+	_flashlight.visible = true # Start with flashlight on
+	_flashlight.light_color = Color(0.9, 0.95, 1.0) # slightly cool LED light
 
 func _input(event: InputEvent) -> void:
 	if get_tree().paused:
@@ -58,6 +72,10 @@ func _input(event: InputEvent) -> void:
 		else:
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 			_mouse_captured = true
+			
+	if event is InputEventKey and event.pressed and event.keycode == KEY_F:
+		if _flashlight != null:
+			_flashlight.visible = not _flashlight.visible
 			
 	if _mouse_captured and event is InputEventMouseMotion:
 		_target_rotation_y -= event.relative.x * mouse_sensitivity
