@@ -1,4 +1,4 @@
-extends PanelContainer
+extends Control
 
 signal clue_clicked(clue_id: String)
 signal clue_dragged(clue_id: String, new_pos: Vector2)

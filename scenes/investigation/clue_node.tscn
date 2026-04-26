@@ -1,31 +1,33 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=2 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/clue_node.gd" id="1_cnode"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_note"]
-bg_color = Color(0.95, 0.92, 0.75, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 2
-border_width_bottom = 3
-border_color = Color(0.6, 0.58, 0.45, 1)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
-shadow_color = Color(0, 0, 0, 0.3)
-shadow_size = 4
-shadow_offset = Vector2(2, 3)
-
-[node name="ClueNode" type="PanelContainer"]
-custom_minimum_size = Vector2(120, 120)
-offset_right = 120.0
-offset_bottom = 120.0
-theme_override_styles/panel = SubResource("StyleBoxFlat_note")
+[node name="ClueNode" type="Control"]
+custom_minimum_size = Vector2(150, 150)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 150.0
+offset_bottom = 150.0
 script = ExtResource("1_cnode")
+z_index = 50
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.95, 0.92, 0.75, 1.0)
+mouse_filter = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
-layout_mode = 2
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
