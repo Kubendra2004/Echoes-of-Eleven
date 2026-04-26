@@ -30,6 +30,10 @@ func _open_board() -> void:
 	_is_open = true
 	visible = true
 	_refresh_board()
+	
+	# Await one frame to ensure Godot UI layout pass completes before pausing
+	await get_tree().process_frame
+	
 	get_tree().paused = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
