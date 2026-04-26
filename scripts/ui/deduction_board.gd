@@ -42,7 +42,21 @@ func _close_board() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 func _refresh_board() -> void:
+	
+	# DEBUG: FORCE SPAWN A DUMMY CLUE
+	if not _clue_nodes.has("debug_dummy"):
+		_spawn_clue_node("debug_dummy", {"name": "DEBUG CLUE", "description": "If you see this, rendering works."})
+
 	var clues = ClueManager.get_collected_clues()
+
+	var file = FileAccess.open("user://debug_board.txt", FileAccess.WRITE)
+	if file:
+		file.store_string("Refresh called!\n")
+		file.store_string("Clues found: " + str(clues.size()) + "\n")
+		var child_count = nodes_layer.get_child_count()
+		file.store_string("NodesLayer children before: " + str(child_count) + "\n")
+		file.store_string("Clues: " + str(clues) + "\n")
+
 	
 	# Spawn any new clues
 	for clue_id in clues:
@@ -61,7 +75,21 @@ func _spawn_clue_node(id: String, data: Dictionary) -> void:
 
 func _on_clue_dragged(clue_id: String, new_pos: Vector2) -> void:
 	# Save position
+	
+	# DEBUG: FORCE SPAWN A DUMMY CLUE
+	if not _clue_nodes.has("debug_dummy"):
+		_spawn_clue_node("debug_dummy", {"name": "DEBUG CLUE", "description": "If you see this, rendering works."})
+
 	var clues = ClueManager.get_collected_clues()
+
+	var file = FileAccess.open("user://debug_board.txt", FileAccess.WRITE)
+	if file:
+		file.store_string("Refresh called!\n")
+		file.store_string("Clues found: " + str(clues.size()) + "\n")
+		var child_count = nodes_layer.get_child_count()
+		file.store_string("NodesLayer children before: " + str(child_count) + "\n")
+		file.store_string("Clues: " + str(clues) + "\n")
+
 	if clues.has(clue_id):
 		clues[clue_id]["board_position"] = {"x": new_pos.x, "y": new_pos.y}
 	
