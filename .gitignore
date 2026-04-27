@@ -58,5 +58,6 @@ debug.log
 # Editor
 .Godot/
 .godot/
+
 *.md
 !README.md
