@@ -60,6 +60,7 @@ func collect_clue(clue_id: String) -> bool:
 		return true
 	
 	collected_clues[clue_id] = _all_clues[clue_id].duplicate(true)
+	collected_clues[clue_id]["id"] = clue_id
 	collected_clues[clue_id]["collected_time"] = {
 		"day": GameState.current_day,
 		"hour": GameState.current_hour
@@ -90,6 +91,30 @@ func get_clues_by_category(category: String) -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	for clue_id in collected_clues:
 		if collected_clues[clue_id].get("category", "") == category:
+			result.append(collected_clues[clue_id])
+	return result
+
+## Load additional clues from a chapter-specific JSON file into the master database.
+## Call this from each chapter controller on _ready so clues are available for collection.
+func load_chapter_clues(file_path: String) -> void:
+	if not FileAccess.file_exists(file_path):
+		push_warning("[ClueManager] Chapter clue file not found: %s" % file_path)
+		return
+	var file = FileAccess.open(file_path, FileAccess.READ)
+	var json = JSON.new()
+	if json.parse(file.get_as_text()) == OK:
+		var new_clues: Dictionary = json.data
+		for clue_id in new_clues:
+			if clue_id not in _all_clues:
+				_all_clues[clue_id] = new_clues[clue_id]
+		print("[ClueManager] Merged %d chapter clues from: %s" % [new_clues.size(), file_path])
+
+## Get all COLLECTED clues that belong to a specific chapter
+func get_clues_for_chapter(chapter_id: String) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for clue_id in collected_clues:
+		var source = _all_clues.get(clue_id, {})
+		if source.get("chapter", "") == chapter_id:
 			result.append(collected_clues[clue_id])
 	return result
 

@@ -1,0 +1,284 @@
+[gd_scene load_steps=45 format=3 uid="uid://chapter2_office"]
+
+[ext_resource type="Script" path="res://scripts/systems/chapter2_controller.gd" id="1_ch2"]
+[ext_resource type="PackedScene" uid="uid://hud" path="res://scenes/hud/hud.tscn" id="2_hud"]
+[ext_resource type="PackedScene" uid="uid://dialogue_ui" path="res://scenes/dialogue/dialogue_ui.tscn" id="3_dui"]
+[ext_resource type="PackedScene" uid="uid://deduction_board" path="res://scenes/investigation/deduction_board.tscn" id="4_db"]
+[ext_resource type="Script" path="res://scripts/entities/interactable_clue.gd" id="5_clue"]
+[ext_resource type="Script" path="res://scripts/systems/detective_camera.gd" id="6_cam"]
+[ext_resource type="Script" path="res://scripts/systems/fps_interaction.gd" id="7_fps"]
+[ext_resource type="Script" path="res://scripts/ui/pause_overlay.gd" id="8_pause"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_floor"]
+size = Vector3(14, 0.2, 12)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
+size = Vector3(14, 0.2, 12)
+
+[sub_resource type="FastNoiseLite" id="Noise_floor"]
+frequency = 0.04
+fractal_type = 2
+
+[sub_resource type="NoiseTexture2D" id="Tex_floor"]
+seamless = true
+noise = SubResource("Noise_floor")
+
+[sub_resource type="StandardMaterial3D" id="Mat_floor"]
+albedo_color = Color(0.18, 0.14, 0.10, 1)
+roughness = 0.6
+roughness_texture = SubResource("Tex_floor")
+uv1_scale = Vector3(5, 5, 5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall"]
+size = Vector3(14, 4, 0.2)
+
+[sub_resource type="StandardMaterial3D" id="Mat_wall_dark"]
+albedo_color = Color(0.14, 0.12, 0.10, 1)
+roughness = 0.9
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall_side"]
+size = Vector3(0.2, 4, 12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_desk"]
+size = Vector3(3.0, 0.1, 1.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_desk"]
+size = Vector3(3.0, 0.8, 1.4)
+
+[sub_resource type="StandardMaterial3D" id="Mat_desk"]
+albedo_color = Color(0.30, 0.22, 0.14, 1)
+roughness = 0.4
+
+[sub_resource type="BoxMesh" id="BoxMesh_desk_leg"]
+size = Vector3(0.1, 0.8, 0.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_filing"]
+size = Vector3(0.8, 1.4, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="Mat_filing"]
+albedo_color = Color(0.45, 0.42, 0.38, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_bookcase"]
+size = Vector3(2.0, 2.5, 0.4)
+
+[sub_resource type="StandardMaterial3D" id="Mat_bookcase"]
+albedo_color = Color(0.25, 0.18, 0.12, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_clue"]
+size = Vector3(0.3, 0.02, 0.22)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_clue"]
+size = Vector3(0.4, 0.2, 0.35)
+
+[sub_resource type="StandardMaterial3D" id="Mat_document"]
+albedo_color = Color(0.95, 0.92, 0.85, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_key"]
+albedo_color = Color(0.78, 0.65, 0.2, 1)
+metallic = 0.9
+roughness = 0.2
+
+[sub_resource type="BoxMesh" id="BoxMesh_key"]
+size = Vector3(0.08, 0.01, 0.18)
+
+[sub_resource type="StandardMaterial3D" id="Mat_safe"]
+albedo_color = Color(0.3, 0.3, 0.32, 1)
+metallic = 0.7
+
+[sub_resource type="BoxMesh" id="BoxMesh_safe"]
+size = Vector3(0.4, 0.35, 0.3)
+
+[node name="Chapter2" type="Node3D"]
+script = ExtResource("1_ch2")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+position = Vector3(0, 4, 0)
+rotation_degrees = Vector3(-55, 30, 0)
+light_color = Color(0.95, 0.88, 0.72, 1)
+light_energy = 0.6
+shadow_enabled = true
+
+[node name="OmniLight_Desk" type="OmniLight3D" parent="."]
+position = Vector3(0, 2.5, 0)
+light_color = Color(1.0, 0.85, 0.6, 1)
+light_energy = 2.5
+omni_range = 6.0
+
+[node name="Floor" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.1, 0)
+mesh = SubResource("BoxMesh_floor")
+surface_material_override/0 = SubResource("Mat_floor")
+
+[node name="FloorCollision" type="StaticBody3D" parent="."]
+position = Vector3(0, -0.1, 0)
+[node name="Shape" type="CollisionShape3D" parent="FloorCollision"]
+shape = SubResource("BoxShape3D_floor")
+
+[node name="WallBack" type="MeshInstance3D" parent="."]
+position = Vector3(0, 2, -6)
+mesh = SubResource("BoxMesh_wall")
+surface_material_override/0 = SubResource("Mat_wall_dark")
+
+[node name="WallLeft" type="MeshInstance3D" parent="."]
+position = Vector3(-7, 2, 0)
+mesh = SubResource("BoxMesh_wall_side")
+surface_material_override/0 = SubResource("Mat_wall_dark")
+
+[node name="WallRight" type="MeshInstance3D" parent="."]
+position = Vector3(7, 2, 0)
+mesh = SubResource("BoxMesh_wall_side")
+surface_material_override/0 = SubResource("Mat_wall_dark")
+
+# Sullivan's large desk
+[node name="Desk" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.8, -2.5)
+mesh = SubResource("BoxMesh_desk")
+surface_material_override/0 = SubResource("Mat_desk")
+
+[node name="DeskCollision" type="StaticBody3D" parent="."]
+position = Vector3(0, 0.8, -2.5)
+[node name="Shape" type="CollisionShape3D" parent="DeskCollision"]
+shape = SubResource("BoxShape3D_desk")
+
+# Filing cabinet (left)
+[node name="FilingCabinet" type="MeshInstance3D" parent="."]
+position = Vector3(-5, 0.7, -4)
+mesh = SubResource("BoxMesh_filing")
+surface_material_override/0 = SubResource("Mat_filing")
+
+# Bookcase (right wall)
+[node name="Bookcase" type="MeshInstance3D" parent="."]
+position = Vector3(5.5, 1.25, -4)
+mesh = SubResource("BoxMesh_bookcase")
+surface_material_override/0 = SubResource("Mat_bookcase")
+
+# CLUES ─────────────────────────────────────────────────────────
+[node name="Clues" type="Node3D" parent="."]
+
+# 1. Business Contract — on desk
+[node name="BusinessContract" type="Area3D" parent="Clues"]
+position = Vector3(-0.8, 0.86, -2.8)
+script = ExtResource("5_clue")
+clue_id = "business_contract"
+clue_display_name = "Disputed Business Contract"
+examine_text = "A partnership contract between Marcus Sullivan and Arjun Mehta. Handwritten 'VOID' scrawled across the last page — but the signature is unmistakably Arjun's. Why would he void his own contract?"
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Clues/BusinessContract"]
+mesh = SubResource("BoxMesh_clue")
+surface_material_override/0 = SubResource("Mat_document")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Clues/BusinessContract"]
+shape = SubResource("BoxShape3D_clue")
+[node name="Label3D" type="Label3D" parent="Clues/BusinessContract"]
+position = Vector3(0, 0.3, 0)
+pixel_size = 0.005
+text = "[E] Examine"
+
+# 2. Insurance Policy — in the safe behind the painting
+[node name="InsurancePolicy" type="Area3D" parent="Clues"]
+position = Vector3(5.0, 2.0, -5.7)
+script = ExtResource("5_clue")
+clue_id = "insurance_policy"
+clue_display_name = "Life Insurance Policy"
+examine_text = "A Rs. 2 crore life insurance policy on Arjun Mehta. Beneficiary: Marcus Sullivan. The policy was taken out exactly 90 days before the murder. Someone was planning ahead."
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Clues/InsurancePolicy"]
+mesh = SubResource("BoxMesh_safe")
+surface_material_override/0 = SubResource("Mat_safe")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Clues/InsurancePolicy"]
+shape = SubResource("BoxShape3D_clue")
+[node name="Label3D" type="Label3D" parent="Clues/InsurancePolicy"]
+position = Vector3(0, 0.3, 0)
+pixel_size = 0.005
+text = "[E] Open Safe"
+
+# 3. Marcus Office Intro document — on a side table
+[node name="OfficeLetter" type="Area3D" parent="Clues"]
+position = Vector3(0.8, 0.86, -2.3)
+script = ExtResource("5_clue")
+clue_id = "marcus_office_intro"
+clue_display_name = "DA's Subpoena Letter"
+examine_text = "A sealed forensic letter from the DA's office. Sullivan was subpoenaed for phone records tied to Arjun Mehta's case. He received this three days ago — yet he claimed ignorance of any police interest."
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Clues/OfficeLetter"]
+mesh = SubResource("BoxMesh_clue")
+surface_material_override/0 = SubResource("Mat_document")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Clues/OfficeLetter"]
+shape = SubResource("BoxShape3D_clue")
+[node name="Label3D" type="Label3D" parent="Clues/OfficeLetter"]
+position = Vector3(0, 0.3, 0)
+pixel_size = 0.005
+text = "[E] Examine"
+
+# 4. Parking Receipt — in a coat hung on a rack
+[node name="ParkingReceipt" type="Area3D" parent="Clues"]
+position = Vector3(-4, 1.2, 2.5)
+script = ExtResource("5_clue")
+clue_id = "parking_receipt"
+clue_display_name = "Parking Receipt"
+examine_text = "A crumpled parking receipt from Vasant Vihar. Timestamp: 11:31 PM, the night of the murder. Vasant Vihar is two blocks from Arjun's apartment. Sullivan said he was at Crown Plaza restaurant. He lied."
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Clues/ParkingReceipt"]
+mesh = SubResource("BoxMesh_clue")
+surface_material_override/0 = SubResource("Mat_document")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Clues/ParkingReceipt"]
+shape = SubResource("BoxShape3D_clue")
+[node name="Label3D" type="Label3D" parent="Clues/ParkingReceipt"]
+position = Vector3(0, 0.3, 0)
+pixel_size = 0.005
+text = "[E] Examine"
+
+# 5. Mystery Key — on the desk (collect last)
+[node name="MysteryKey" type="Area3D" parent="Clues"]
+position = Vector3(0.3, 0.87, -2.1)
+script = ExtResource("5_clue")
+clue_id = "mystery_key"
+clue_display_name = "Unmarked Key"
+examine_text = "A small, unmarked key. The tag has been removed but you can make out a partial stamp: 'NDRS L47'. New Delhi Railway Station, Locker 47. What did Sullivan hide there?"
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Clues/MysteryKey"]
+mesh = SubResource("BoxMesh_key")
+surface_material_override/0 = SubResource("Mat_key")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Clues/MysteryKey"]
+shape = SubResource("BoxShape3D_clue")
+[node name="Label3D" type="Label3D" parent="Clues/MysteryKey"]
+position = Vector3(0, 0.3, 0)
+pixel_size = 0.005
+text = "[E] Examine"
+
+# Player ─────────────────────────────────────────────────────────
+[node name="Player" type="CharacterBody3D" parent="."]
+position = Vector3(0, 1.0, 4)
+
+[node name="Camera3D" type="Camera3D" parent="Player"]
+position = Vector3(0, 0.6, 0)
+script = ExtResource("6_cam")
+
+[node name="RayCast3D" type="RayCast3D" parent="Player/Camera3D"]
+script = ExtResource("7_fps")
+
+[node name="CrosshairUI" type="CanvasLayer" parent="Player"]
+[node name="Crosshair" type="Label" parent="Player/CrosshairUI"]
+anchors_preset = 8
+anchor_left = 0.5; anchor_top = 0.5; anchor_right = 0.5; anchor_bottom = 0.5
+offset_left = -10; offset_top = -10; offset_right = 10; offset_bottom = 10
+text = "+"
+horizontal_alignment = 1
+vertical_alignment = 1
+[node name="InteractHint" type="Label" parent="Player/CrosshairUI"]
+anchors_preset = 8
+anchor_left = 0.5; anchor_top = 0.5; anchor_right = 0.5; anchor_bottom = 0.5
+offset_left = -100; offset_top = 20; offset_right = 100; offset_bottom = 50
+text = ""
+horizontal_alignment = 1
+
+# UI ─────────────────────────────────────────────────────────────
+[node name="HUD" parent="." instance=ExtResource("2_hud")]
+[node name="DialogueUI" parent="." instance=ExtResource("3_dui")]
+[node name="DeductionBoard" parent="." instance=ExtResource("4_db")]
+[node name="PauseOverlay" type="CanvasLayer" parent="."]
+script = ExtResource("8_pause")
+
+[node name="ChapterLabel" type="CanvasLayer" parent="."]
+layer = 2
+[node name="Label" type="Label" parent="ChapterLabel"]
+anchors_preset = 1
+anchor_left = 1.0; anchor_right = 1.0
+offset_left = -200; offset_top = 8; offset_right = -8; offset_bottom = 36
+text = "Chapter 2: The Warning"
+horizontal_alignment = 2

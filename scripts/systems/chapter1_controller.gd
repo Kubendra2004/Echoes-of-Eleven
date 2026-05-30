@@ -94,10 +94,14 @@ func _on_clue_found(clue: Dictionary) -> void:
 	match count:
 		3:
 			if hud: hud.set_objective("Talk to the neighbor in apartment 4A")
+			_enable_neighbor_door()
 		5:
 			if hud: hud.set_objective("Review your evidence on the deduction board (press I)")
 		_:
 			pass
+
+	if clue.get("id") == "neighbor_testimony":
+		DialogueManager.start_dialogue("res://dialogue_data/chapter1_neighbor.json")
 
 	if count >= 6 and not _chase_triggered:
 		_trigger_chase_sequence()
@@ -107,6 +111,42 @@ func _on_deduction_made(_deduction_id: String) -> void:
 		hud.show_notification("💡 New deduction unlocked!", 4.0)
 
 # ──────────────────────────────────────────────
+func _enable_neighbor_door() -> void:
+	# Check if it already exists
+	if get_node_or_null("/root/CrimeScene/Clues/NeighborDoor"): return
+	
+	# Try to find the Clues container
+	var clues_node = get_node_or_null("/root/CrimeScene/Clues")
+	if not clues_node: return
+	
+	# Spawn a new InteractableClue for the door
+	var door_clue = load("res://scripts/entities/interactable_clue.gd").new()
+	door_clue.name = "NeighborDoor"
+	door_clue.clue_id = "neighbor_testimony"
+	door_clue.clue_display_name = "Apartment 4A Door"
+	door_clue.examine_text = "Mrs. Park lives here. She might have heard something."
+	door_clue.position = Vector3(-6.5, 1.0, 2.0)
+	
+	# Add a collision shape
+	var collision = CollisionShape3D.new()
+	var shape = BoxShape3D.new()
+	shape.size = Vector3(0.5, 2.0, 1.5)
+	collision.shape = shape
+	door_clue.add_child(collision)
+	
+	# Add the floating label
+	var label = Label3D.new()
+	label.text = "[E] Knock"
+	label.pixel_size = 0.005
+	label.position = Vector3(0.3, 0.2, 0)
+	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	door_clue.add_child(label)
+	
+	clues_node.add_child(door_clue)
+	
+	# Setup logic when examining this clue to trigger dialogue
+	# We rely on the ClueManager emitting clue_collected for this ID
+	
 func _trigger_chase_sequence() -> void:
 	_chase_triggered = true
 
@@ -277,10 +317,16 @@ func _show_chapter_complete_screen(outcome: String) -> void:
 	vbox.add_child(saved_lbl)
 
 	var btn = Button.new()
-	btn.text = "Return to Main Menu"
-	btn.custom_minimum_size = Vector2(240, 48)
+	btn.text = "Continue to Chapter 2 →"
+	btn.custom_minimum_size = Vector2(280, 48)
 	btn.modulate.a = 0.0
 	vbox.add_child(btn)
+
+	var menu_btn = Button.new()
+	menu_btn.text = "Return to Main Menu"
+	menu_btn.custom_minimum_size = Vector2(280, 48)
+	menu_btn.modulate.a = 0.0
+	vbox.add_child(menu_btn)
 
 	# Animate everything in
 	var t = create_tween().set_parallel(true)
@@ -290,10 +336,15 @@ func _show_chapter_complete_screen(outcome: String) -> void:
 	t.tween_property(stats, "modulate:a", 1.0, 1.0).set_delay(1.1)
 	t.tween_property(saved_lbl, "modulate:a", 1.0, 1.0).set_delay(1.4)
 	t.tween_property(btn, "modulate:a", 1.0, 1.0).set_delay(1.8)
+	t.tween_property(menu_btn, "modulate:a", 1.0, 1.0).set_delay(2.0)
 
 	await t.finished
 
 	btn.pressed.connect(func():
+		get_tree().paused = false
+		SceneManager.change_scene("res://scenes/chapter2/sullivan_office.tscn")
+	)
+	menu_btn.pressed.connect(func():
 		get_tree().paused = false
 		SceneManager.go_to_main_menu()
 	)

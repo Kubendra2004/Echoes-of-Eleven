@@ -20,6 +20,37 @@ var _connecting_mode: bool = false        # true while waiting for 2nd clue
 func _ready() -> void:
 	visible = false
 	close_btn.pressed.connect(_close_board)
+	
+	# Apply Midnight Noir skin
+	corkboard_bg.texture = null
+	# Deep charcoal background #080A10
+	corkboard_bg.modulate = Color(0.03, 0.04, 0.06, 1.0)
+	
+	# Style the DetailPanel
+	var panel_style = StyleBoxFlat.new()
+	panel_style.bg_color = Color(0.07, 0.08, 0.1, 0.88)
+	panel_style.border_color = Color(1.0, 0.75, 0.0, 0.5)
+	panel_style.set_border_width_all(1)
+	var panel = $Overlay/DetailPanel
+	panel.add_theme_stylebox_override("panel", panel_style)
+	
+	# Style Close Button
+	var btn_normal = StyleBoxFlat.new()
+	btn_normal.bg_color = Color(0.07, 0.08, 0.1, 1.0)
+	btn_normal.border_color = Color(1.0, 0.75, 0.0, 1.0)
+	btn_normal.set_border_width_all(1)
+	
+	var btn_hover = btn_normal.duplicate()
+	btn_hover.bg_color = Color(1.0, 0.75, 0.0, 1.0)
+	
+	close_btn.add_theme_stylebox_override("normal", btn_normal)
+	close_btn.add_theme_stylebox_override("hover", btn_hover)
+	close_btn.add_theme_color_override("font_color", Color(0.88, 0.88, 0.92, 1.0))
+	close_btn.add_theme_color_override("font_hover_color", Color(0.07, 0.08, 0.1, 1.0))
+
+	# Title color (Amber)
+	var title = $Overlay/TopBar/Title
+	title.add_theme_color_override("font_color", Color(1.0, 0.75, 0.0, 1.0))
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("inventory"):
