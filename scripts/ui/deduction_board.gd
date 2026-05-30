@@ -6,9 +6,9 @@ extends CanvasLayer
 # --- Scene refs (built from actual .tscn node tree) ---
 @onready var lines_layer: Control  = $LinesLayer
 @onready var nodes_layer: Control  = $NodesLayer
-@onready var close_btn: Button     = $Overlay/MarginContainer/VBoxContainer/Header/CloseButton
-@onready var detail_label: RichTextLabel = $Overlay/MarginContainer/VBoxContainer/DetailPanel/MarginContainer/DetailLabel
-@onready var connections_label: Label    = $Overlay/MarginContainer/VBoxContainer/ConnectionsLabel
+@onready var close_btn: Button     = $Overlay/TopBar/CloseButton
+@onready var detail_label: RichTextLabel = $Overlay/DetailPanel/Margin/DetailLabel
+@onready var connections_label: Label    = $Overlay/TopBar/ConnectionsLabel
 
 # --- State ---
 var _is_open: bool = false
