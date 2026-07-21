@@ -61,3 +61,4 @@ debug.log
 
 *.md
 !README.md
+!DOCKER_GUIDE.md
