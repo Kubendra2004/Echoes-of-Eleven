@@ -133,6 +133,9 @@ func _end_chapter() -> void:
 	_show_chapter_complete()
 
 func _show_chapter_complete() -> void:
+	get_tree().paused = true
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
 	var overlay = CanvasLayer.new()
 	overlay.layer = 50
 	add_child(overlay)

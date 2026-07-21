@@ -17,6 +17,10 @@ var _quit_btn: Button
 var _all_btns: Array[Button] = []
 
 func _ready() -> void:
+	# Guarantee clean state when entering main menu
+	get_tree().paused = false
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	
 	_build_ui()
 	_animate_intro()
 

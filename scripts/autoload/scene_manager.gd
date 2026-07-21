@@ -12,6 +12,9 @@ var _transition_overlay: ColorRect
 var _tween: Tween
 
 func _ready() -> void:
+	# Ensure transitions play even if the game is paused
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	
 	# Create a full-screen overlay for fade transitions
 	_transition_overlay = ColorRect.new()
 	_transition_overlay.color = Color.BLACK
@@ -49,6 +52,8 @@ func change_scene(scene_path: String, fade_duration: float = 0.5) -> void:
 	_tween.tween_property(_transition_overlay, "modulate:a", 0.0, fade_duration)
 	await _tween.finished
 	
+	# Guarantee the game is unpaused when a new scene begins
+	get_tree().paused = false
 	transition_finished.emit()
 
 ## Quick scene change without fade

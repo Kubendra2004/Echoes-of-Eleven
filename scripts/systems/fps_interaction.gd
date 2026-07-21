@@ -18,9 +18,11 @@ func _ready() -> void:
 	enabled = true
 	collide_with_areas = true
 	collide_with_bodies = true
-	interact_hint.modulate = Color(0.1, 0.18, 0.28, 0.0)
-	interact_hint.visible = true # Always visible but alpha controlled
-	crosshair_label.modulate = _crosshair_color_current
+	if interact_hint:
+		interact_hint.modulate = Color(0.1, 0.18, 0.28, 0.0)
+		interact_hint.visible = true # Always visible but alpha controlled
+	if crosshair_label:
+		crosshair_label.modulate = _crosshair_color_current
 
 func _process(delta: float) -> void:
 	_pulse_time += delta
@@ -37,17 +39,20 @@ func _process(delta: float) -> void:
 
 	# Smooth alpha fade
 	_hint_alpha_current = lerpf(_hint_alpha_current, _hint_alpha_target, 10.0 * delta)
-	interact_hint.modulate.a = _hint_alpha_current
+	if interact_hint:
+		interact_hint.modulate.a = _hint_alpha_current
 	
 	# Smooth crosshair color transition
 	_crosshair_color_current = _crosshair_color_current.lerp(_crosshair_color_target, 10.0 * delta)
-	crosshair_label.modulate = _crosshair_color_current
+	if crosshair_label:
+		crosshair_label.modulate = _crosshair_color_current
 
-	if _hint_alpha_current > 0.01:
-		var pulse = 0.95 + sin(_pulse_time * 4.0) * 0.05
-		interact_hint.scale = Vector2(pulse, pulse)
-	else:
-		interact_hint.scale = Vector2.ONE
+	if interact_hint:
+		if _hint_alpha_current > 0.01:
+			var pulse = 0.95 + sin(_pulse_time * 4.0) * 0.05
+			interact_hint.scale = Vector2(pulse, pulse)
+		else:
+			interact_hint.scale = Vector2.ONE
 
 func _update_hint() -> void:
 	if _current_target == null:
@@ -59,13 +64,16 @@ func _update_hint() -> void:
 	if _current_target is Area3D:
 		var parent = _current_target
 		if parent.has_method("_examine") or parent.has_method("_talk"):
-			_hint_alpha_target = 1.0
-			_crosshair_color_target = Color(0.95, 0.82, 0.35, 1.0)
-			
+			var text = ""
 			if parent.has_method("_examine"):
-				interact_hint.text = "[E / Enter / Left Click] Examine"
+				text = "[E / Enter / Left Click] Examine"
 			elif parent.has_method("_talk"):
-				interact_hint.text = "[E / Enter / Left Click] Talk"
+				text = "[E / Enter / Left Click] Talk"
+		
+			if interact_hint:
+				interact_hint.text = text
+			_hint_alpha_target = 1.0
+			_crosshair_color_target = Color(1.0, 0.8, 0.3, 1.0)
 			return
 	
 	_hint_alpha_target = 0.0

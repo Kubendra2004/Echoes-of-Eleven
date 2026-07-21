@@ -266,6 +266,9 @@ func _end_chapter(outcome: String) -> void:
 	_show_chapter_complete_screen(outcome)
 
 func _show_chapter_complete_screen(outcome: String) -> void:
+	get_tree().paused = true
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
 	var overlay = CanvasLayer.new()
 	overlay.layer = 50
 	add_child(overlay)

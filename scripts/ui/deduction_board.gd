@@ -4,6 +4,7 @@
 extends CanvasLayer
 
 # --- Scene refs (built from actual .tscn node tree) ---
+@onready var corkboard_bg: TextureRect = $CorkboardBG
 @onready var lines_layer: Control  = $LinesLayer
 @onready var nodes_layer: Control  = $NodesLayer
 @onready var close_btn: Button     = $Overlay/TopBar/CloseButton
